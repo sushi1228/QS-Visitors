@@ -449,11 +449,23 @@ $ipadHostOptionsCenter = ($center !== null)
 				} else {
 					$("#VisitAbout").val(company + " - Trainee");
 				}
+
+				resetField($("#VisitAbout"));
+
+				if ($("#errormsg").text().indexOf("Please fill all the required fields.") >= 0) {
+                    $("#errormsg").html("");
+                }
 			});
 
 			$("#HostID").on("change", function () {
 
 				if ($.trim($(this).val()) !== "") {
+
+					resetField($(this));
+
+					if ($("#errormsg").text().indexOf("Please fill all the required fields.") >= 0) {
+						$("#errormsg").html("");
+					}
 
 					$("#CompanySelect").hide();
 
@@ -533,9 +545,16 @@ $ipadHostOptionsCenter = ($center !== null)
 				$("#Email").prop('readonly', false);
 				$("#FullName, #EmpID").prop('readonly', false);
 				$("#errormsg").html("");
-				$('#FullName, #Email, #EmpID').css({ "border-color": "#bdbdbd", "background-color": "#FFF" });
-				$('#HostID').css({ "border-color": "#bdbdbd", "background-color": "#FFF" });
-				$('#VisitAbout').css({ "border-color": "#bdbdbd", "background-color": "#FFF" });
+				$('#FullName, #Email, #EmpID, #VisitAbout, #CompanyName, #CompanySelect').css({
+					"border-color": "#bdbdbd",
+					"background-color": "#FFF"
+				});
+
+				$('#HostID').css({
+					"border-color": "#bdbdbd",
+					"background-color": "#FFF"
+				});
+
 				$("#VisitAbout").val("");
 				$("#VisitAbout").show();
 				/*$("#CompanyName").prop('readonly', false); $("#Mobile").prop('readonly', false);*/
@@ -683,6 +702,58 @@ $ipadHostOptionsCenter = ($center !== null)
 				});  /* Agr. Signature removed since 11/12/19 --  only KGCT since 12/4/19 */
 			<?php } ?>
 
+			function resetField($field) {
+				$field.css({
+					"border-color": "#bdbdbd",
+					"background-color": "#FFF"
+				});
+			}
+
+			$("#Email, #EmpID").on("input", function () {
+
+				if ($.trim($("#Email").val()) !== "" || $.trim($("#EmpID").val()) !== "") {
+
+					resetField($("#Email"));
+					resetField($("#EmpID"));
+
+					$(".identity-help").hide();
+
+					if ($("#errormsg").text().indexOf("Please fill all the required fields.") >= 0) {
+						$("#errormsg").html("");
+					}
+
+				} else {
+
+					$(".identity-help").show();
+
+				}
+
+			});
+
+			$("#FullName").on("input", function () {
+				if ($.trim($(this).val()) !== "") {
+					resetField($(this));
+				}
+			});
+
+			$("#VisitAbout").on("input", function () {
+				if ($.trim($(this).val()) !== "") {
+					resetField($(this));
+				}
+			});
+
+			$("#CompanyName").on("input", function () {
+				if ($.trim($(this).val()) !== "") {
+					resetField($(this));
+				}
+			});
+
+			$("#CompanySelect").on("change", function () {
+				if ($.trim($(this).val()) !== "") {
+					resetField($(this));
+				}
+			});
+
 			$("#checkin").click(function () {
 				if ($(this).data("submitted") === true) {
 					return false;
@@ -692,7 +763,7 @@ $ipadHostOptionsCenter = ($center !== null)
 				var msgerr = "";
 
 
-				$('#FullName, #Email, #EmpID, #VisitAbout').css({
+				$('#FullName, #Email, #EmpID, #VisitAbout, #CompanyName, #CompanySelect').css({
 					"border-color": "#bdbdbd",
 					"background-color": "#FFF"
 				});
@@ -723,6 +794,9 @@ $ipadHostOptionsCenter = ($center !== null)
 				if (email1 === "" && empId === "") {
 					err = 1;
 					$('#Email, #EmpID').css({ "border-color": "red", "background-color": "#F79BB7" });
+
+					$(".identity-help").show();
+
 				}
 
 				if (email1 !== "" && !emailReg.test(email1)) {
@@ -736,6 +810,20 @@ $ipadHostOptionsCenter = ($center !== null)
 				if ($.trim($("#VisitAbout").val()) == "") {
 					err = 1;
 					$('#VisitAbout').css({ "border-color": "red", "background-color": "#F79BB7" });
+				}
+
+				var companyRequired = $("#CompanyName").is(":visible")
+					? $.trim($("#CompanyName").val())
+					: $.trim($("#CompanySelect").val());
+
+				if (companyRequired === "") {
+					err = 1;
+
+					if ($("#CompanyName").is(":visible")) {
+						$('#CompanyName').css({ "border-color": "red", "background-color": "#F79BB7" });
+					} else {
+						$('#CompanySelect').css({ "border-color": "red", "background-color": "#F79BB7" });
+					}
 				}
 
 				if ($("#CompanyName").is(":visible") && $.trim($("#HostID").val()) === "") {
@@ -878,8 +966,9 @@ $ipadHostOptionsCenter = ($center !== null)
 									<label>Employee ID</label>
 									<input name="EmpID" id="EmpID" type="text" class="form-control"
 										placeholder="Employee ID" autocomplete="off" />
-									<span class="identity-help" style="color: red;">Please enter an Email Address or
-										Employee ID.</span>
+									<span class="identity-help" style="color: red;">
+										Please enter an Email Address or Employee ID.
+									</span>
 								</div>
 							</div>
 						</div>
@@ -887,7 +976,7 @@ $ipadHostOptionsCenter = ($center !== null)
 						<div class="form-group mb-none">
 							<div class="row">
 								<div class="col-sm-6 mb-lg">
-									<label>Company</label>
+									<label>Company <span class="required">*</span></label>
 
 									<select id="CompanySelect" class="form-control">
 										<option value="">-- Select Company --</option>
